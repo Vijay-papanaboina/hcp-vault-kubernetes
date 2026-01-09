@@ -31,8 +31,6 @@ server:
         kms_key_id = "alias/vault-unseal"
       }
 
-      service_registration "kubernetes" {}
-
   extraSecretEnvironmentVars:
     - envName: AWS_ACCESS_KEY_ID
       secretName: vault-aws-creds

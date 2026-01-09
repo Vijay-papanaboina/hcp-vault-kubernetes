@@ -6,19 +6,10 @@ injector:
   enabled: true
 
 server:
-  # 1. Disable Dev Mode (simulates real production)
-  dev:
-    enabled: false
-
-  # Explicitly disable HA features that cause crashes in standalone mode
-  serviceRegistration:
-    enabled: false
-
-  # 2. persistent storage (so data survives pod restarts, but seal state doesn't)
+  # Persistent storage (so data survives pod restarts, but seal state doesn't)
   dataStorage:
     enabled: true
     size: 1Gi
-    # storageClass: standard  <-- REMOVED to use default
 
   # 3. Standalone mode (simpler than HA for learning)
   standalone:

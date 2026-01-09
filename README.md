@@ -76,9 +76,9 @@ kubectl logs deployment/myapp -n apps
 
 ---
 
-## 🟡 Mode 2: AWS KMS Auto-Unseal (Production)
+## 🟡 Mode 2: AWS KMS Standalone (Production)
 
-Vault auto-unseals using AWS KMS. Requires AWS setup first.
+Single-node Vault with AWS KMS auto-unseal. Simple and reliable.
 
 ### Step 1: Create AWS Resources
 
@@ -133,16 +133,18 @@ export VAULT_TOKEN="hvs.<YOUR_TOKEN>"
 bash ./scripts/configure-vault.sh
 ```
 
+> [!TIP] > **Want Raft HA (3-node cluster)?** Use the same AWS setup above, then choose **option 3** in deploy.sh. Requires 3+ worker nodes.
+
 ---
 
-## � Mode 3: Manual Unseal (Learning)
+## 🔴 Mode 4: Manual Unseal (Learning)
 
 Vault starts **sealed**. You must manually initialize and unseal.
 
 ### Step 1: Deploy
 
 ```bash
-bash ./scripts/deploy.sh  # Choose option 3
+bash ./scripts/deploy.sh  # Choose option 4
 ```
 
 ### Step 2: Initialize
