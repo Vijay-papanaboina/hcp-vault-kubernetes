@@ -45,9 +45,10 @@ echo ""
 echo "[5/7] Installing Vault and VSO..."
 echo "Select Vault Deployment Mode:"
 echo "  1) Dev Mode (Self-unsealing, root token: root)"
-echo "  2) AWS KMS (Production simulation, Auto-unseal)"
-echo "  3) Manual (Production simulation, requires manual init/unseal)"
-read -p "Enter choice [1-3]: " VAULT_CHOICE
+echo "  2) AWS KMS Standalone (Auto-unseal, single node)"
+echo "  3) AWS KMS Raft HA (Auto-unseal, 3 nodes)"
+echo "  4) Manual (Production simulation, requires manual init/unseal)"
+read -p "Enter choice [1-4]: " VAULT_CHOICE
 
 case $VAULT_CHOICE in
     1)
@@ -59,6 +60,10 @@ case $VAULT_CHOICE in
         MODE="AWS KMS"
         ;;
     3)
+        VALUES_FILE="kubernetes/vault/aws/vault-values-aws-raft.yaml"
+        MODE="AWS Raft"
+        ;;
+    4)
         VALUES_FILE="kubernetes/vault/manual/vault-values-manual.yaml"
         MODE="Manual"
         ;;

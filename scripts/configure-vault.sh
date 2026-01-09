@@ -16,6 +16,11 @@ echo "=========================================="
 echo "Starting Vault Configuration"
 echo "=========================================="
 
+# 0. Enable audit logging
+echo ""
+echo "[0/7] Enabling audit logging..."
+vault audit enable file file_path=/vault/logs/audit.log 2>/dev/null || echo "  -> Already enabled"
+
 # 1. Enable KV-v2 secrets engine (may already exist in dev mode)
 echo ""
 echo "[1/7] Enabling KV-v2 secrets engine..."
@@ -86,7 +91,7 @@ vault write database/roles/myapp-role \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
     revocation_statements="REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM \"{{name}}\"; DROP ROLE IF EXISTS \"{{name}}\";" \
     default_ttl="1h" \
-    max_ttl="24h"
+    max_ttl="3h"
 
 echo ""
 echo "=========================================="

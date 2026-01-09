@@ -21,11 +21,12 @@ bash ./scripts/deploy.sh
 
 You will be prompted to choose a **Vault Mode**:
 
-| Mode           | Description                  | Use Case      |
-| -------------- | ---------------------------- | ------------- |
-| **1. Dev**     | Auto-unsealed, token: `root` | Quick testing |
-| **2. AWS KMS** | Auto-unseal via AWS KMS      | Production    |
-| **3. Manual**  | Requires manual init/unseal  | Learning      |
+| Mode                   | Description                  | Use Case          |
+| ---------------------- | ---------------------------- | ----------------- |
+| **1. Dev**             | Auto-unsealed, token: `root` | Quick testing     |
+| **2. AWS KMS**         | Auto-unseal, single node     | Production        |
+| **3. AWS KMS Raft HA** | Auto-unseal, 3-node cluster  | High Availability |
+| **4. Manual**          | Requires manual init/unseal  | Learning          |
 
 ---
 
@@ -45,7 +46,8 @@ kubernetes/
 │   ├── manual/
 │   │   └── vault-values-manual.yaml
 │   ├── aws/
-│   │   └── vault-values-aws.yaml
+│   │   ├── vault-values-aws.yaml
+│   │   └── vault-values-aws-raft.yaml
 │   └── vault-rbac.yaml
 └── apps/
     ├── service-account.yaml

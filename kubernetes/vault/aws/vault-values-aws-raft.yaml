@@ -6,32 +6,36 @@ injector:
   enabled: true
 
 server:
+  # HA mode with Raft
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        # AWS KMS Auto-Unseal
+        seal "awskms" {
+          region     = "ap-south-2"
+          kms_key_id = "alias/vault-unseal"
+        }
+
+        service_registration "kubernetes" {}
+
   dataStorage:
     enabled: true
     size: 1Gi
-
-  standalone:
-    enabled: true
-    config: |
-      ui = true
-
-      listener "tcp" {
-        tls_disable = 1
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-      }
-
-      storage "file" {
-        path = "/vault/data"
-      }
-
-      # AWS KMS Auto-Unseal
-      seal "awskms" {
-        region     = "ap-south-2"
-        kms_key_id = "alias/vault-unseal"
-      }
-
-      service_registration "kubernetes" {}
 
   extraSecretEnvironmentVars:
     - envName: AWS_ACCESS_KEY_ID
