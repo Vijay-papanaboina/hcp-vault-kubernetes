@@ -1,0 +1,15 @@
+# RBAC for Vault to use TokenReview API
+# The Vault Helm chart creates a ServiceAccount named "vault"
+# We bind it to system:auth-delegator to allow TokenReview calls
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault
+    namespace: vault

@@ -1,0 +1,8 @@
+# Kubernetes
+.kube/
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

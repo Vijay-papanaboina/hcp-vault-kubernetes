@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      serviceAccountName: myapp-sa
+      containers:
+        - name: myapp
+          image: alpine:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Demo app starting..."
+              echo "Waiting for secrets to be mounted..."
+              sleep 10
+
+              while true; do
+                echo ""
+                echo "=========================================="
+                echo "$(date)"
+                echo "=========================================="
+                echo ""
+                echo "STATIC SECRETS (API Keys from Vault KV):"
+                echo "  stripe_api_key:   $(cat /secrets/static/stripe_api_key 2>/dev/null || echo 'NOT MOUNTED')"
+                echo "  sendgrid_api_key: $(cat /secrets/static/sendgrid_api_key 2>/dev/null || echo 'NOT MOUNTED')"
+                echo "  jwt_secret:       $(cat /secrets/static/jwt_secret 2>/dev/null || echo 'NOT MOUNTED')"
+                echo ""
+                echo "DYNAMIC SECRETS (PostgreSQL creds from Vault DB engine):"
+                echo "  username: $(cat /secrets/db/username 2>/dev/null || echo 'NOT MOUNTED')"
+                echo "  password: $(cat /secrets/db/password 2>/dev/null || echo 'NOT MOUNTED')"
+                echo ""
+                echo "Next check in 30 seconds..."
+                sleep 30
+              done
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "256m"
+            limits:
+              memory: "128Mi"
+              cpu: "512m"
+          volumeMounts:
+            - name: static-secrets
+              mountPath: /secrets/static
+              readOnly: true
+            - name: db-secrets
+              mountPath: /secrets/db
+              readOnly: true
+      volumes:
+        - name: static-secrets
+          secret:
+            secretName: myapp-api-keys
+            optional: true
+        - name: db-secrets
+          secret:
+            secretName: myapp-db-credentials
+            optional: true

@@ -1,0 +1,40 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: database
+spec:
+  instances: 3
+
+  # PostgreSQL configuration
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+
+  # Bootstrap - just create the database (Vault manages users dynamically)
+  bootstrap:
+    initdb:
+      database: myapp
+
+  # Storage configuration
+  storage:
+    size: 1Gi
+
+  # Resource limits
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Enable monitoring
+  monitoring:
+    enablePodMonitor: false
+
+  # Enable superuser access (required for Vault to manage dynamic users)
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: postgres-superuser-secret

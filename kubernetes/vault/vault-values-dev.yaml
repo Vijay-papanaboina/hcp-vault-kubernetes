@@ -1,0 +1,15 @@
+global:
+  enabled: true
+  tlsDisable: true
+
+injector:
+  enabled: true
+
+server:
+  dev:
+    enabled: true
+    devRootToken: "root"
+
+ui:
+  enabled: true
+  serviceType: NodePort

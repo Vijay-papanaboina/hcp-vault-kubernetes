@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-config
+  namespace: vault
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: vault-config
+          image: hashicorp/vault:1.15
+          command: ["/bin/sh", "/scripts/configure-vault.sh"]
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault.vault.svc.cluster.local:8200"
+            - name: VAULT_TOKEN
+              value: "root"
+          volumeMounts:
+            - name: config-script
+              mountPath: /scripts
+      volumes:
+        - name: config-script
+          configMap:
+            name: vault-config-script
+            defaultMode: 0755
+      restartPolicy: OnFailure
+  backoffLimit: 5
