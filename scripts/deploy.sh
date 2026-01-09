@@ -55,11 +55,11 @@ case $VAULT_CHOICE in
         MODE="Dev"
         ;;
     2)
-        VALUES_FILE="kubernetes/vault/vault-values-aws.yaml"
+        VALUES_FILE="kubernetes/vault/aws/vault-values-aws.yaml"
         MODE="AWS KMS"
         ;;
     3)
-        VALUES_FILE="kubernetes/vault/vault-values-manual.yaml"
+        VALUES_FILE="kubernetes/vault/manual/vault-values-manual.yaml"
         MODE="Manual"
         ;;
     *)
