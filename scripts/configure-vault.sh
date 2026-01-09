@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# These should be exported in the terminal BEFORE running the script
+# export VAULT_ADDR="http://<NODE_IP>:<NODE_PORT>"
+# export VAULT_TOKEN="hvs.<YOUR_TOKEN>"
+
 echo "Waiting for Vault to be ready..."
 until vault status 2>/dev/null; do
     echo "Vault not ready, waiting..."
@@ -34,9 +38,6 @@ vault auth enable kubernetes 2>/dev/null || echo "  -> Already enabled"
 # 4. Configure Kubernetes auth
 echo ""
 echo "[4/7] Configuring Kubernetes auth..."
-# Read Kubernetes CA cert and token from mounted service account
-KUBE_CA_CERT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)
-KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 
 vault write auth/kubernetes/config \
     kubernetes_host="https://kubernetes.default.svc:443" \

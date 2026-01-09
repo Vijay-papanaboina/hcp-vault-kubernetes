@@ -1,0 +1,44 @@
+global:
+  enabled: true
+  tlsDisable: true
+
+injector:
+  enabled: true
+
+server:
+  # 1. Disable Dev Mode (simulates real production)
+  dev:
+    enabled: false
+
+  # Explicitly disable HA features that cause crashes in standalone mode
+  serviceRegistration:
+    enabled: false
+
+  # 2. persistent storage (so data survives pod restarts, but seal state doesn't)
+  dataStorage:
+    enabled: true
+    size: 1Gi
+    # storageClass: standard  <-- REMOVED to use default
+
+  # 3. Standalone mode (simpler than HA for learning)
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+
+
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+      # NO "seal" block here - this forces manual unsealing!
+
+ui:
+  enabled: true
+  serviceType: NodePort
