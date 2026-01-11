@@ -1,6 +1,63 @@
-# HCP Vault with Kubernetes
+# HashiCorp Vault on Kubernetes
 
-Production-grade HashiCorp Vault setup with static secrets (KV) and dynamic secrets (PostgreSQL) using the Vault Secrets Operator.
+Production-grade HashiCorp Vault setup with **static secrets** (KV) and **dynamic secrets** (PostgreSQL) using the Vault Secrets Operator.
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph "AWS"
+        KMS[(KMS Key)]
+    end
+
+    subgraph "Kubernetes Cluster"
+        subgraph "vault namespace"
+            Vault[Vault Server]
+        end
+
+        subgraph "vault-secrets-operator-system"
+            VSO[Vault Secrets Operator]
+        end
+
+        subgraph "apps namespace"
+            Secret1[K8s Secret: Static]
+            Secret2[K8s Secret: Dynamic]
+            App[Demo App]
+        end
+
+        subgraph "database namespace"
+            PG[(PostgreSQL)]
+        end
+    end
+
+    KMS -->|Auto-Unseal| Vault
+    Vault -->|KV Secrets| VSO
+    Vault -->|DB Credentials| VSO
+    VSO -->|Sync| Secret1
+    VSO -->|Sync + Rotate| Secret2
+    Secret1 --> App
+    Secret2 --> App
+    Vault -->|Dynamic Lease| PG
+```
+
+## ✨ Features
+
+| Feature                    | Description                               |
+| -------------------------- | ----------------------------------------- |
+| **Static Secrets**         | KV secrets synced to K8s via VSO          |
+| **Dynamic Secrets**        | PostgreSQL credentials with auto-rotation |
+| **4 Deployment Modes**     | Dev, AWS KMS, AWS KMS Raft HA, Manual     |
+| **Auto-Unseal**            | AWS KMS integration for production        |
+| **High Availability**      | Raft HA cluster (3-node) support          |
+| **Vault Secrets Operator** | Modern CRD-based secret sync              |
+
+## 🛠️ Components
+
+| Component                  | Version | Purpose                           |
+| -------------------------- | ------- | --------------------------------- |
+| HashiCorp Vault            | 1.15+   | Secrets management                |
+| Vault Secrets Operator     | 0.4+    | K8s secret synchronization        |
+| PostgreSQL (CloudNativePG) | 16      | Demo database for dynamic secrets |
 
 ## Prerequisites
 
@@ -192,6 +249,53 @@ kubectl get secret myapp-db-credentials -n apps -o jsonpath='{.data.username}' |
 # Watch demo app logs
 kubectl logs -f deployment/myapp -n apps
 ```
+
+---
+
+## 🔒 Security Best Practices
+
+### 1. Revoke Root Token After Setup
+
+> [!IMPORTANT]
+> The root token has unlimited privileges and never expires. **Revoke it immediately after initial configuration.**
+
+```bash
+# After running configure-vault.sh, revoke the root token
+vault token revoke <ROOT_TOKEN>
+
+# If you need root access later, generate a new one (requires unseal keys)
+vault operator generate-root -init
+```
+
+### 2. Use Short TTLs for Dynamic Secrets
+
+The default lease for database credentials is set to **1 hour** with max **24 hours**. In production, consider even shorter:
+
+```hcl
+# In configure-vault.sh, the database role uses:
+default_ttl = "1h"
+max_ttl     = "24h"
+```
+
+Shorter TTLs = smaller window if credentials are compromised.
+
+### 3. Enable Audit Logging (Production)
+
+```bash
+# Enable file audit log
+vault audit enable file file_path=/vault/logs/audit.log
+
+# Or send to stdout for K8s log collection
+vault audit enable file file_path=stdout
+```
+
+### 4. Design Decisions
+
+| Decision                                          | Reason                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| **IAM User credentials** (not IRSA)               | Kubernetes-agnostic: works on minikube, kind, GKE, AKS, not just EKS |
+| **Vault Secrets Operator** (not Sidecar Injector) | Simpler, CRD-based, better for GitOps                                |
+| **Single KMS key**                                | Demo simplicity; production may use separate keys per environment    |
 
 ---
 
